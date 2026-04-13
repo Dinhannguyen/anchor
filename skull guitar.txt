@@ -1,34 +1,41 @@
--- Script Auto Equip Item by Cải
+-- Script Auto Equip Item Continuous by Cải
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
-local function AutoEquipGuitar()
-    local itemName = "Soul Guitar" -- Cải để tên chuẩn, Bin có thể sửa nếu muốn
-    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-    
-    -- Kiểm tra xem item đã có trong Character (đang cầm) hoặc Backpack chưa
-    -- Vì LoadItem thường dùng cho Accessories hoặc để kích hoạt trang bị từ hòm đồ
-    local isEquipped = character:FindFirstChild(itemName)
-    
-    if not isEquipped then
-        print("Cải phát hiện Bin chưa trang bị " .. itemName .. ". Đang tiến hành gọi Remote...")
-        
-        -- Gọi Remote trang bị theo yêu cầu của Bin
-        local success, err = pcall(function()
-            CommF_:InvokeServer("LoadItem", itemName)
-        end)
-        
-        if success then
-            print("✅ Cải đã trang bị xong " .. itemName .. " cho Bin rồi nhé!")
-        else
-            warn("❌ Lỗi khi trang bị: " .. tostring(err))
-        end
-    else
-        print("✨ Bin đã trang bị " .. itemName .. " từ trước rồi!")
-    end
-end
+-- Biến để Bin có thể tắt/mở script dễ dàng
+_G.AutoEquipGuitar = true 
 
--- Chạy lệnh
-AutoEquipGuitar()
+print("Cải đã bắt đầu theo dõi trang bị cho Bin!")
+
+task.spawn(function()
+    while _G.AutoEquipGuitar do
+        local itemName = "Soul Guitar"
+        local character = LocalPlayer.Character
+        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        
+        if character and backpack then
+            -- Kiểm tra xem item có trong tay (Character) hoặc trong túi (Backpack) chưa
+            local isEquipped = character:FindFirstChild(itemName) or backpack:FindFirstChild(itemName)
+            
+            if not isEquipped then
+                print("Cải không thấy " .. itemName .. ", đang trang bị lại cho Bin...")
+                
+                local success, err = pcall(function()
+                    return CommF_:InvokeServer("LoadItem", itemName)
+                end)
+                
+                if success then
+                    print("✅ Cải đã đeo " .. itemName .. " thành công!")
+                else
+                    warn("❌ Lỗi khi gọi Remote: " .. tostring(err))
+                end
+            end
+        end
+        
+        -- Nghỉ 5 giây rồi kiểm tra tiếp để tránh lag máy Bin nhé
+        task.wait(5)
+    end
+    print("Cải đã ngừng theo dõi trang bị.")
+end)
