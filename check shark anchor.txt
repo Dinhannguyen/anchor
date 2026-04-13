@@ -1,43 +1,56 @@
--- Script Check & Write File Soul Guitar by Cải
+-- Script Loop Check & Write File Shark Anchor by Cải
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
--- Hàm kiểm tra xem đã có Soul Guitar chưa
-local function hasSoulGuitar()
-    local success, inventory = pcall(function()
-        return CommF_:InvokeServer("getInventory")
-    end)
+-- Biến kiểm soát vòng lặp
+_G.MonitorAnchor = true 
 
-    if success and inventory then
-        for _, item in pairs(inventory) do
-            -- Cải để tên chuẩn của game là Soul Guitar nhé
-            if item.Name == "Soul Guitar" then
-                return true
+print("Cải đã bắt đầu canh chừng Shark Anchor cho Bin...")
+
+task.spawn(function()
+    while _G.MonitorAnchor do
+        -- 1. Quét Inventory
+        local success, inventory = pcall(function()
+            return CommF_:InvokeServer("getInventory")
+        end)
+
+        if success and inventory then
+            local hasItem = false
+            for _, item in pairs(inventory) do
+                if item.Name == "Shark Anchor" then
+                    hasItem = true
+                    break
+                end
+            end
+
+            -- 2. Nếu tìm thấy thì thực hiện các bước tiếp theo
+            if hasItem then
+                local username = LocalPlayer.Name
+                local fileName = username .. ".txt"
+                local content = "completed-anchor"
+                
+                local writeSuccess, err = pcall(function()
+                    if writefile then
+                        writefile(fileName, content)
+                        return true
+                    end
+                end)
+
+                if writeSuccess then
+                    print("✅ Chúc mừng Bin! Đã có Shark Anchor và xuất file: " .. fileName)
+                    -- 3. Đã xong việc thì Cải dừng vòng lặp luôn cho nhẹ máy
+                    _G.MonitorAnchor = false 
+                    break 
+                end
+            else
+                print("🔍 Cải vẫn đang tìm... Bin cố lên, sắp có Mỏ neo rồi!")
             end
         end
-    end
-    return false
-end
 
--- Logic chính: Kiểm tra và xuất file
-task.spawn(function()
-    if hasSoulGuitar() then
-        print("✅ Đã thấy Soul Guitar! Cải đang ghi file cho Bin...")
-        
-        -- Tên file và nội dung theo yêu cầu của Bin
-        local fileName = "SoulGuitar_Status.txt"
-        local content = "Completed-soul guitar"
-        
-        local writeSuccess, err = pcall(function()
-            writefile(fileName, content)
-        end)
-        
-        if writeSuccess then
-            print("💾 File đã nằm gọn trong folder workspace rồi nhé Bin: " .. fileName)
-        else
-            warn("❌ Cải không ghi file được, lỗi: " .. tostring(err))
-        end
-    else
-        print("❌ Bin chưa có Soul Guitar rồi, kiểm tra lại xem đã craft chưa nhé!")
+        -- Đợi 15 giây rồi kiểm tra lại lần nữa
+        task.wait(15)
     end
+    print("🏁 Cải đã hoàn thành nhiệm vụ và nghỉ ngơi.")
 end)
