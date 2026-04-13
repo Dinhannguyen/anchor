@@ -1,0 +1,42 @@
+-- Script Check & Write File Shark Anchor by Cải
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
+
+-- Hàm kiểm tra xem đã có Shark Anchor chưa
+local function hasSharkAnchor()
+    local success, inventory = pcall(function()
+        return CommF_:InvokeServer("getInventory")
+    end)
+
+    if success and inventory then
+        for _, item in pairs(inventory) do
+            if item.Name == "Shark Anchor" then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- Logic chính: Kiểm tra và xuất file
+task.spawn(function()
+    if hasSharkAnchor() then
+        print("✅ Có Shark Anchor. Cải đang xuất file cho Bin...")
+        
+        -- Lệnh writefile sẽ tạo file trong thư mục 'workspace' của bản hack
+        local fileName = "SharkAnchor_Status.txt"
+        local content = "Completed-shark anchor"
+        
+        local writeSuccess, err = pcall(function()
+            writefile(fileName, content)
+        end)
+        
+        if writeSuccess then
+            print("💾 Đã lưu file: " .. fileName)
+        else
+            warn("❌ Không thể tạo file. Lỗi: " .. tostring(err))
+        end
+    else
+        print("❌ Chưa có Shark Anchor. Bin ráng farm thêm nhé!")
+    end
+end)

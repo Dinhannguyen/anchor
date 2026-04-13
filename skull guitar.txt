@@ -1,0 +1,34 @@
+-- Script Auto Equip Item by Cải
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
+
+local function AutoEquipGuitar()
+    local itemName = "Soul Guitar" -- Cải để tên chuẩn, Bin có thể sửa nếu muốn
+    local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    
+    -- Kiểm tra xem item đã có trong Character (đang cầm) hoặc Backpack chưa
+    -- Vì LoadItem thường dùng cho Accessories hoặc để kích hoạt trang bị từ hòm đồ
+    local isEquipped = character:FindFirstChild(itemName)
+    
+    if not isEquipped then
+        print("Cải phát hiện Bin chưa trang bị " .. itemName .. ". Đang tiến hành gọi Remote...")
+        
+        -- Gọi Remote trang bị theo yêu cầu của Bin
+        local success, err = pcall(function()
+            CommF_:InvokeServer("LoadItem", itemName)
+        end)
+        
+        if success then
+            print("✅ Cải đã trang bị xong " .. itemName .. " cho Bin rồi nhé!")
+        else
+            warn("❌ Lỗi khi trang bị: " .. tostring(err))
+        end
+    else
+        print("✨ Bin đã trang bị " .. itemName .. " từ trước rồi!")
+    end
+end
+
+-- Chạy lệnh
+AutoEquipGuitar()

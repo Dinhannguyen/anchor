@@ -1,0 +1,113 @@
+-- Script Auto Stats & Refund Logic by Cải
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CoreGui = game:GetService("CoreGui")
+local LocalPlayer = Players.LocalPlayer
+
+-- Remote của game
+local Remote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("CommF_")
+
+-- 1. Hàm Tẩy điểm (Refund)
+local function ForceRefund()
+    if Remote then
+        Remote:InvokeServer("BlackbeardReward", "Refund", "2")
+        print("Cải đã thực hiện tẩy điểm vì phát hiện nâng nhầm vào Kiếm hoặc Trái ác quỷ!")
+    end
+end
+
+-- 2. Hàm Tự động nâng điểm theo thứ tự ưu tiên của Bin
+local function AutoAddStats()
+    local data = LocalPlayer:FindFirstChild("Data")
+    local stats = data and data:FindFirstChild("Stats")
+    if not (data and stats and Remote) then return end
+
+    local level = data.Level.Value
+    local points = data.Points.Value
+    
+    if points > 0 then
+        local melee = stats.Melee.Level.Value
+        local gun = stats.Gun.Level.Value
+        local defense = stats.Defense.Level.Value
+
+        -- Ưu tiên 1: Melee (Nâng cho bằng Level)
+        if melee < level then
+            Remote:InvokeServer("AddPoint", "Melee", 10000)
+        -- Ưu tiên 2: Gun (Nâng cho bằng Level)
+        elseif gun < level then
+            Remote:InvokeServer("AddPoint", "Gun", 10000)
+        -- Ưu tiên 3: Defense (Nâng cho bằng Level)
+        elseif defense < level then
+            Remote:InvokeServer("AddPoint", "Defense", 100000)
+        end
+    end
+end
+
+-- 3. GUI hiển thị cho Bin
+if CoreGui:FindFirstChild("BinStatsGUI") then CoreGui.BinStatsGUI:Destroy() end
+
+local ScreenGui = Instance.new("ScreenGui", CoreGui)
+ScreenGui.Name = "BinStatsGUI"
+local MainFrame = Instance.new("Frame", ScreenGui)
+MainFrame.Size = UDim2.new(0, 250, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -125, 0.5, -140)
+MainFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MainFrame.Active = true
+MainFrame.Draggable = true
+
+local Title = Instance.new("TextLabel", MainFrame)
+Title.Size = UDim2.new(1, 0, 0, 40)
+Title.Text = "BIN & CẢI AUTO STATS"
+Title.TextColor3 = Color3.fromRGB(0, 255, 255)
+Title.BackgroundTransparency = 1
+Title.Font = Enum.Font.GothamBold
+
+local StatsList = Instance.new("TextLabel", MainFrame)
+StatsList.Size = UDim2.new(1, -20, 0, 180)
+StatsList.Position = UDim2.new(0, 10, 0, 40)
+StatsList.TextXAlignment = Enum.TextXAlignment.Left
+StatsList.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatsList.BackgroundTransparency = 1
+StatsList.Font = Enum.Font.GothamMedium
+
+local CloseBtn = Instance.new("TextButton", MainFrame)
+CloseBtn.Size = UDim2.new(0.8, 0, 0, 30)
+CloseBtn.Position = UDim2.new(0.1, 0, 0.85, 0)
+CloseBtn.Text = "DỪNG SCRIPT"
+CloseBtn.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+-- 4. Vòng lặp kiểm tra liên tục
+spawn(function()
+    while wait(0.5) do -- Kiểm tra mỗi 0.5 giây để tránh lag
+        if not ScreenGui.Parent then break end
+        
+        local data = LocalPlayer:FindFirstChild("Data")
+        local stats = data and data:FindFirstChild("Stats")
+        
+        if data and stats then
+            local lv = data.Level.Value
+            local pt = data.Points.Value
+            local m = stats.Melee.Level.Value
+            local d = stats.Defense.Level.Value
+            local g = stats.Gun.Level.Value
+            local s = stats.Sword.Level.Value
+            local f = stats["Demon Fruit"].Level.Value
+            
+            -- Cập nhật chữ trên GUI
+            StatsList.Text = string.format(
+                "⭐ Level: %d\n✨ Points: %d\n\n⚔️ Melee: %d\n🔫 Gun: %d\n🛡️ Defense: %d\n\n⚠️ Sword: %d (Max 100)\n🍎 Fruit: %d (Max 100)",
+                lv, pt, m, g, d, s, f
+            )
+            
+            -- Check Refund logic của Bin
+            if s > 100 or f > 100 then
+                ForceRefund()
+            else
+                -- Nếu không cần Refund thì tiến hành Auto nâng điểm
+                AutoAddStats()
+            end
+        end
+    end
+end)
+
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
