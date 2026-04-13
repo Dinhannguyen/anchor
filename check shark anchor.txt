@@ -29,7 +29,7 @@ task.spawn(function()
             if hasItem then
                 local username = LocalPlayer.Name
                 local fileName = username .. ".txt"
-                local content = "completed-anchor"
+                local content = "Completed-anchor"
                 
                 local writeSuccess, err = pcall(function()
                     if writefile then
