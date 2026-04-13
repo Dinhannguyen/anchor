@@ -1,16 +1,17 @@
--- Script Check & Write File Shark Anchor by Cải
+-- Script Check & Write File Soul Guitar by Cải
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
--- Hàm kiểm tra xem đã có Shark Anchor chưa
-local function hasSharkAnchor()
+-- Hàm kiểm tra xem đã có Soul Guitar chưa
+local function hasSoulGuitar()
     local success, inventory = pcall(function()
         return CommF_:InvokeServer("getInventory")
     end)
 
     if success and inventory then
         for _, item in pairs(inventory) do
-            if item.Name == "Shark Anchor" then
+            -- Cải để tên chuẩn của game là Soul Guitar nhé
+            if item.Name == "Soul Guitar" then
                 return true
             end
         end
@@ -20,23 +21,23 @@ end
 
 -- Logic chính: Kiểm tra và xuất file
 task.spawn(function()
-    if hasSharkAnchor() then
-        print("✅ Có Shark Anchor. Cải đang xuất file cho Bin...")
+    if hasSoulGuitar() then
+        print("✅ Đã thấy Soul Guitar! Cải đang ghi file cho Bin...")
         
-        -- Lệnh writefile sẽ tạo file trong thư mục 'workspace' của bản hack
-        local fileName = "SharkAnchor_Status.txt"
-        local content = "Completed-shark anchor"
+        -- Tên file và nội dung theo yêu cầu của Bin
+        local fileName = "SoulGuitar_Status.txt"
+        local content = "Completed-soul guitar"
         
         local writeSuccess, err = pcall(function()
             writefile(fileName, content)
         end)
         
         if writeSuccess then
-            print("💾 Đã lưu file: " .. fileName)
+            print("💾 File đã nằm gọn trong folder workspace rồi nhé Bin: " .. fileName)
         else
-            warn("❌ Không thể tạo file. Lỗi: " .. tostring(err))
+            warn("❌ Cải không ghi file được, lỗi: " .. tostring(err))
         end
     else
-        print("❌ Chưa có Shark Anchor. Bin ráng farm thêm nhé!")
+        print("❌ Bin chưa có Soul Guitar rồi, kiểm tra lại xem đã craft chưa nhé!")
     end
 end)
