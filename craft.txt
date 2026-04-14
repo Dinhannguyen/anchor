@@ -1,32 +1,15 @@
--- Script Auto Craft Shark Anchor by Cải
+-- Auto Craft Shark Anchor mỗi 10 giây
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
 
--- Remote chuẩn để Craft trong Blox Fruits
-local Remote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("CommF_")
-
--- Biến kiểm soát vòng lặp (nếu Bin muốn dừng thì có thể đổi thành false)
-_G.AutoCraftAnchor = true
-
-print("Cải đã bắt đầu vòng lặp Auto Craft cho Bin!")
+_G.AutoCraftSharkAnchor = true
 
 task.spawn(function()
-    while _G.AutoCraftAnchor do
-        if Remote then
-            -- Thực hiện lệnh Craft Shark Anchor
-            local success, result = pcall(function()
-                return Remote:InvokeServer("Craft", "SharkAnchor", 1, {})
-            end)
-            
-            if success then
-                print("Cải vừa gửi yêu cầu chế tạo Shark Anchor cho Bin...")
-            else
-                warn("Lỗi khi gửi yêu cầu Craft, có thể do game lag!")
-            end
-        else
-            warn("Cải không tìm thấy Remote CommF_, Bin kiểm tra lại nhé!")
-        end
+    while _G.AutoCraftSharkAnchor do
+        pcall(function()
+            CommF_:InvokeServer("Craft", "SharkAnchor", 1, {})
+        end)
         
-        -- Nghỉ 10 giây theo ý Bin
         task.wait(10)
     end
 end)
