@@ -1,41 +1,21 @@
--- Script Auto Equip Item Continuous by Cải
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local Players = game:GetService("Players")
-local LocalPlayer = Players.LocalPlayer
-local CommF_ = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_")
-
--- Biến để Bin có thể tắt/mở script dễ dàng
-_G.AutoEquipGuitar = true 
-
-print("Cải đã bắt đầu theo dõi trang bị cho Bin!")
+local CommF_ = game.ReplicatedStorage.Remotes.CommF_
+_G.AutoEquipGuitar = true
 
 task.spawn(function()
     while _G.AutoEquipGuitar do
-        local itemName = "Soul Guitar"
-        local character = LocalPlayer.Character
-        local backpack = LocalPlayer:FindFirstChild("Backpack")
+        local char = game.Players.LocalPlayer.Character
         
-        if character and backpack then
-            -- Kiểm tra xem item có trong tay (Character) hoặc trong túi (Backpack) chưa
-            local isEquipped = character:FindFirstChild(itemName) or backpack:FindFirstChild(itemName)
+        if char and not char:FindFirstChild("Skull Guitar") then
+            local inv = CommF_:InvokeServer("getInventory")
             
-            if not isEquipped then
-                print("Cải không thấy " .. itemName .. ", đang trang bị lại cho Bin...")
-                
-                local success, err = pcall(function()
-                    return CommF_:InvokeServer("LoadItem", itemName)
-                end)
-                
-                if success then
-                    print("✅ Cải đã đeo " .. itemName .. " thành công!")
-                else
-                    warn("❌ Lỗi khi gọi Remote: " .. tostring(err))
+            for _,v in pairs(inv) do
+                if v.Name == "Skull Guitar" then
+                    CommF_:InvokeServer("LoadItem", "Skull Guitar")
+                    break
                 end
             end
         end
         
-        -- Nghỉ 5 giây rồi kiểm tra tiếp để tránh lag máy Bin nhé
-        task.wait(5)
+        task.wait(2)
     end
-    print("Cải đã ngừng theo dõi trang bị.")
 end)
